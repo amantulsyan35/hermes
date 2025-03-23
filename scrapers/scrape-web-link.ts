@@ -1,17 +1,5 @@
 import { load } from 'cheerio';
-
-export interface ExtractedContent {
-	title: string;
-	url: string;
-	publishedDate: string | null; // When the content was originally published
-	fullContent: string;
-	metaData: {
-		ogTitle?: string;
-		ogDescription?: string;
-		ogImage?: string;
-		keywords?: string;
-	};
-}
+import { ExtractedContent } from '../types/web';
 
 export async function extractWebPageContent(link: string): Promise<ExtractedContent> {
 	try {

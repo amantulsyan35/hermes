@@ -12,11 +12,14 @@
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.7.5",
 		"@cloudflare/workers-types": "^4.20250317.0",
+		"@types/node": "^22.13.11",
 		"typescript": "^5.5.2",
 		"vitest": "~3.0.7",
 		"wrangler": "^4.1.0"
 	},
 	"dependencies": {
-		"cheerio": "^1.0.0"
+		"cheerio": "^1.0.0",
+		"sqlite": "^5.1.1",
+		"sqlite3": "^5.1.7"
 	}
 }

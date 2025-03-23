@@ -1,27 +1,12 @@
 import { load } from 'cheerio';
-
-export interface ExtractedYouTubeContent {
-	title: string;
-	url: string;
-	videoId: string;
-	channelName: string;
-	publishDate: string | null; // This is the published date from YouTube
-	description: string;
-	metaData: {
-		ogTitle?: string;
-		ogDescription?: string;
-		ogImage?: string;
-		keywords?: string;
-		viewCount?: string;
-		likeCount?: string;
-		duration?: string;
-	};
-}
+import { YoutubeTranscript } from '../utils/youtube';
+import { TranscriptResponse, ExtractedYouTubeContent } from '../types/youtube';
 
 export async function extractYouTubeContent(link: string): Promise<ExtractedYouTubeContent> {
 	try {
 		// Extract video ID from YouTube URL
-		const videoId = extractYouTubeVideoId(link);
+
+		const videoId = YoutubeTranscript.retrieveVideoId(link);
 
 		// Fetch the HTML content from the link
 		const response = await fetch(link);
@@ -73,6 +58,15 @@ export async function extractYouTubeContent(link: string): Promise<ExtractedYouT
 			metaData.viewCount = viewCountText;
 		}
 
+		// Get transcript if available
+		let transcript: TranscriptResponse[] | undefined = undefined;
+		try {
+			transcript = await YoutubeTranscript.fetchTranscript(link);
+		} catch (transcriptError) {
+			console.error(`Could not fetch transcript for ${link}:`, transcriptError);
+			// Not throwing here since transcript is optional
+		}
+
 		return {
 			title,
 			url: link,
@@ -81,6 +75,7 @@ export async function extractYouTubeContent(link: string): Promise<ExtractedYouT
 			publishDate,
 			description,
 			metaData,
+			transcript, // Add transcript to the returned object
 		};
 	} catch (error) {
 		console.error(`Error extracting YouTube content from ${link}:`, error);
@@ -89,44 +84,12 @@ export async function extractYouTubeContent(link: string): Promise<ExtractedYouT
 		return {
 			title: 'Error loading YouTube video',
 			url: link,
-			videoId: extractYouTubeVideoId(link) || '',
+			videoId: YoutubeTranscript.retrieveVideoId(link) || '',
 			channelName: '',
 			publishDate: null,
 			description: 'Failed to retrieve content from this YouTube video.',
 			metaData: {},
+			// No transcript in error case
 		};
 	}
-}
-
-// Helper function to extract YouTube video ID from different URL formats
-function extractYouTubeVideoId(url: string): string {
-	let videoId = '';
-
-	// Handle regular YouTube URLs: https://www.youtube.com/watch?v=VIDEO_ID
-	const watchRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\?\/]+)/;
-	const watchMatch = url.match(watchRegex);
-
-	// Handle YouTube short URLs: https://youtu.be/VIDEO_ID
-	const shortRegex = /youtu\.be\/([^&\?\/]+)/;
-	const shortMatch = url.match(shortRegex);
-
-	// Handle YouTube embed URLs: https://www.youtube.com/embed/VIDEO_ID
-	const embedRegex = /youtube\.com\/embed\/([^&\?\/]+)/;
-	const embedMatch = url.match(embedRegex);
-
-	// Handle YouTube shorts URLs: https://www.youtube.com/shorts/VIDEO_ID
-	const shortsRegex = /youtube\.com\/shorts\/([^&\?\/]+)/;
-	const shortsMatch = url.match(shortsRegex);
-
-	if (watchMatch && watchMatch[1]) {
-		videoId = watchMatch[1];
-	} else if (shortMatch && shortMatch[1]) {
-		videoId = shortMatch[1];
-	} else if (embedMatch && embedMatch[1]) {
-		videoId = embedMatch[1];
-	} else if (shortsMatch && shortsMatch[1]) {
-		videoId = shortsMatch[1];
-	}
-
-	return videoId;
 }

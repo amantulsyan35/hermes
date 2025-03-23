@@ -1,18 +1,9 @@
-import { classifyWebLinks, ClassifiedWebLinks } from '../utils/classify-web-links';
-import { ExtractedContent, extractWebPageContent } from '../utils/scrape-web-link';
-import { ExtractedYouTubeContent, extractYouTubeContent } from '../utils/extract-youtube-link';
-
-interface OpenSourceContent {
-	title: string;
-	url: string;
-	createdTime: string;
-}
-
-interface OpenSourceResponse {
-	entries: OpenSourceContent[];
-	nextCursor: string;
-	hasMore: boolean;
-}
+import { classifyWebLinks } from '../utils/classify-web-links';
+import { extractWebPageContent } from '../scrapers/scrape-web-link';
+import { extractYouTubeContent } from '../scrapers/scrape-youtube-link';
+import { ExtractedContent } from '../types/web';
+import { ExtractedYouTubeContent } from '../types/youtube';
+import { OpenSourceResponse } from '../types/content-api';
 
 interface ScrapedResults {
 	web?: (ExtractedContent & { consumedAt?: string })[];
@@ -113,3 +104,5 @@ export default {
 		}
 	},
 } satisfies ExportedHandler<Env>;
+
+// Write a program that prints out the numbers 1 to 100 (inclusive). If the number is divisible by 3, print Crackle instead of the number. If it's divisible by 5, print Pop instead of the number. If it's divisible by both 3 and 5, print CracklePop instead of the number. You can use any language.
